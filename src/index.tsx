@@ -11,6 +11,8 @@ type CustomBrush = {
   height: number
 }
 
+type ImageSource = string | File | { src?: string; default?: string }
+
 type CustomCheckZone = {
   x: number,
   y: number,
@@ -21,7 +23,8 @@ type CustomCheckZone = {
 interface Props {
   width: number
   height: number
-  image: any
+  image: ImageSource
+  imageCrossOrigin?: '' | 'anonymous' | 'use-credentials'
   finishPercent?: number
   onComplete?: () => void
   brushSize?: number
@@ -49,6 +52,8 @@ class Scratch extends Component<Props, State> {
 
   image: HTMLImageElement;
 
+  objectUrl: string | null = null;
+
   isFinished: boolean = false;
 
   constructor(props: Props) {
@@ -56,19 +61,68 @@ class Scratch extends Component<Props, State> {
     this.state = { loaded: false, finished: false };
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.image !== this.props.image) {
+      this.loadImage();
+    }
+  }
+
+  componentWillUnmount() {
+    this.revokeObjectUrl();
+  }
+
+  revokeObjectUrl() {
+    if (this.objectUrl) {
+      URL.revokeObjectURL(this.objectUrl);
+      this.objectUrl = null;
+    }
+  }
+
+  resolveImageSource(image: ImageSource): string {
+    this.revokeObjectUrl();
+
+    if (typeof image === 'string') {
+      return image;
+    }
+
+    if (image instanceof File) {
+      this.objectUrl = URL.createObjectURL(image);
+      return this.objectUrl;
+    }
+
+    if (image && typeof image.src === 'string') {
+      return image.src;
+    }
+
+    if (image && typeof image.default === 'string') {
+      return image.default;
+    }
+
+    return '';
+  }
+
+  loadImage() {
+    this.image = new Image();
+    this.image.crossOrigin = this.props.imageCrossOrigin === undefined
+      ? 'anonymous'
+      : this.props.imageCrossOrigin;
+    this.image.onload = () => {
+      this.ctx.globalCompositeOperation = 'source-over';
+      this.ctx.clearRect(0, 0, this.props.width, this.props.height);
+      this.ctx.drawImage(this.image, 0, 0, this.props.width, this.props.height);
+      this.isFinished = false;
+      this.setState({ loaded: true, finished: false });
+    };
+
+    this.image.src = this.resolveImageSource(this.props.image);
+  }
+
   componentDidMount() {
     this.isDrawing = false;
     this.lastPoint = null;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
 
-    this.image = new Image();
-    this.image.crossOrigin = 'Anonymous';
-    this.image.onload = () => {
-      this.ctx.drawImage(this.image, 0, 0, this.props.width, this.props.height);
-      this.setState({ loaded: true });
-    };
-
-    this.image.src = this.props.image;
+    this.loadImage();
 
     if (this.props.customBrush) {
       this.brushImage = new Image(

@@ -35,7 +35,7 @@ yarn add react-scratchingcard
 
 ```tsx
 import React, { useRef }  from 'react';
-import ScratchCard from 'react-scratchcard-v2';
+import ScratchCard from 'react-scratchingcard';
 
 import * as IMG from './img.jpg';
 
@@ -100,7 +100,7 @@ const App = () => {
 or you can use CUSTOM_BRUSH_PRESET object
 
 ```tsx
-import { CUSTOM_BRUSH_PRESET } from 'react-scratchcard-v2';
+import { CUSTOM_BRUSH_PRESET } from 'react-scratchingcard';
 
 const App = () => {
   return (
@@ -128,13 +128,29 @@ const App = () => {
 |-------------------|-----------------|-------------|
 | width             | number          |             |
 | height            | number          |             |
-| image             | File or Base64  |             |
+| image             | File \| string \| {src?: string, default?: string}  |             |
+| imageCrossOrigin  | ?'' \| 'anonymous' \| 'use-credentials' | 'anonymous' |
 | finishPercent     | ?number         | 70          |
 | brushSize         | ?number         | 20          |
 | fadeOutOnComplete | ?boolean        | true        |
 | onComplete        | ?callback       |             |
 | customBrush       | ?CustomBrush    |             |
 | customCheckZone   | ?CustomCheckZone|             |
+
+### Remote URL
+
+```tsx
+<ScratchCard
+  width={320}
+  height={226}
+  image='https://cdn.example.com/scratch-cover.jpg'
+  imageCrossOrigin='anonymous'
+>
+  <h1>Scratch card</h1>
+</ScratchCard>
+```
+
+Note: pour calculer le pourcentage gratté (`finishPercent`) avec une image distante, le serveur distant doit autoriser CORS.
 
 ### CustomBrush
 
