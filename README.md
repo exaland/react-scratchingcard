@@ -4,6 +4,7 @@
 
 [![NPM](https://img.shields.io/npm/v/react-scratchingcard.svg)](https://www.npmjs.com/package/react-scratchingcard) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
+[![Deploy GitHub Pages](https://github.com/exaland/react-scratchingcard/actions/workflows/deploy-pages.yml/badge.svg?branch=main)](https://github.com/exaland/react-scratchingcard/actions/workflows/deploy-pages.yml)
 
 ##### Original repo by Aleksik (not maintained)
 https://github.com/aleksik/react-scratchcard
@@ -176,16 +177,3 @@ Le composant n'impose plus CORS par defaut pour une URL distante. `imageCrossOri
 ## License
 
 MIT © [exaland](https://github.com/exaland)
-
-## GitHub Pages
-
-Le projet est configure pour publier automatiquement la demo sur GitHub Pages via GitHub Actions.
-
-- URL attendue: https://exaland.github.io/react-scratchingcard/
-- Workflow: [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml)
-
-Activation (une seule fois sur GitHub):
-
-1. Ouvre Settings > Pages.
-2. Dans Build and deployment, choisis Source: GitHub Actions.
-3. Push sur main ou lance le workflow manuellement.

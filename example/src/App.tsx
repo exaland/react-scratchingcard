@@ -7,31 +7,31 @@ type Locale = 'fr' | 'en'
 
 const copy = {
   fr: {
-    eyebrow: 'Demo React Component',
-    title: 'Casino Retro Scratch Card',
-    subtitle: 'Gratte la carte, revele ton lot et replonge dans l atmosphere des salles de jeux vintage.',
-    sectionTitle: 'Jackpot Instantane',
-    sectionText: 'Gratte 80% de la zone pour declencher la revelation.',
+    eyebrow: 'Demo React Neon Edition',
+    title: 'Vegas Neon Scratch Card',
+    subtitle: 'Gratte le ticket, revele ton lot, et profite d une ambiance casino neon facon Las Vegas.',
+    sectionTitle: 'Neon Jackpot',
+    sectionText: 'Gratte 80% de la zone pour allumer le reveal.',
     reset: 'Rejouer',
     prizeLabel: 'TU REMPORTES',
     prizeText: '-20%',
     prizeCaption: 'sur ta prochaine commande',
     statusIdle: 'Gratte la surface pour decouvrir ton bonus.',
-    statusDone: 'Jackpot ! Carte terminee.',
+    statusDone: 'Jackpot neon ! Carte terminee.',
     langButton: 'English'
   },
   en: {
-    eyebrow: 'React Component Demo',
-    title: 'Retro Casino Scratch Card',
-    subtitle: 'Scratch the ticket, reveal your prize, and dive into a classic casino vibe.',
-    sectionTitle: 'Instant Jackpot',
-    sectionText: 'Scratch 80% of the area to unlock the reveal.',
+    eyebrow: 'React Neon Edition Demo',
+    title: 'Vegas Neon Scratch Card',
+    subtitle: 'Scratch the ticket, reveal your prize, and enjoy a bold Las Vegas neon atmosphere.',
+    sectionTitle: 'Neon Jackpot',
+    sectionText: 'Scratch 80% of the area to light up the reveal.',
     reset: 'Play Again',
     prizeLabel: 'YOU WIN',
     prizeText: '-20%',
     prizeCaption: 'on your next order',
     statusIdle: 'Scratch the surface to reveal your bonus.',
-    statusDone: 'Jackpot! Card completed.',
+    statusDone: 'Neon jackpot! Card completed.',
     langButton: 'Francais'
   }
 } as const
@@ -65,7 +65,7 @@ const App = () => {
             {t.langButton}
           </button>
         </div>
-        <h1>{t.title}</h1>
+        <h1 className="neon-title">{t.title}</h1>
         <p className="subtitle">{t.subtitle}</p>
       </section>
 
