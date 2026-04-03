@@ -7,8 +7,8 @@ type Locale = 'fr' | 'en'
 
 const copy = {
   fr: {
-    eyebrow: 'Demo React Neon Edition',
-    title: 'Vegas Neon Scratch Card',
+    eyebrow: 'Demo ReactScratchingCard',
+    title: 'Carte à Gratter neon facon Las Vegas',
     subtitle: 'Gratte le ticket, revele ton lot, et profite d une ambiance casino neon facon Las Vegas.',
     sectionTitle: 'Neon Jackpot',
     sectionText: 'Gratte 80% de la zone pour allumer le reveal.',
@@ -21,7 +21,7 @@ const copy = {
     langButton: 'English'
   },
   en: {
-    eyebrow: 'React Neon Edition Demo',
+    eyebrow: 'ReactScratchingCard Demo',
     title: 'Vegas Neon Scratch Card',
     subtitle: 'Scratch the ticket, reveal your prize, and enjoy a bold Las Vegas neon atmosphere.',
     sectionTitle: 'Neon Jackpot',
