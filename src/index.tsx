@@ -39,6 +39,8 @@ interface State {
   finished: boolean
 }
 
+const SCRATCH_GRID_SIZE = 4
+
 class Scratch extends Component<Props, State> {
   isDrawing = false
 
@@ -53,6 +55,10 @@ class Scratch extends Component<Props, State> {
   image: HTMLImageElement;
 
   objectUrl: string | null = null;
+
+  scratchedCells: Set<string> = new Set();
+
+  scratchableCellCount = 0;
 
   isFinished: boolean = false;
 
@@ -103,13 +109,14 @@ class Scratch extends Component<Props, State> {
 
   loadImage() {
     this.image = new Image();
-    this.image.crossOrigin = this.props.imageCrossOrigin === undefined
-      ? 'anonymous'
-      : this.props.imageCrossOrigin;
+    if (this.props.imageCrossOrigin !== undefined) {
+      this.image.crossOrigin = this.props.imageCrossOrigin;
+    }
     this.image.onload = () => {
       this.ctx.globalCompositeOperation = 'source-over';
       this.ctx.clearRect(0, 0, this.props.width, this.props.height);
       this.ctx.drawImage(this.image, 0, 0, this.props.width, this.props.height);
+      this.initializeScratchGrid();
       this.isFinished = false;
       this.setState({ loaded: true, finished: false });
     };
@@ -137,14 +144,12 @@ class Scratch extends Component<Props, State> {
     this.canvas.style.opacity = '1';
     this.ctx.globalCompositeOperation = 'source-over';
     this.ctx.drawImage(this.image, 0, 0, this.props.width, this.props.height);
+    this.initializeScratchGrid();
     this.isFinished = false;
+    this.setState({ finished: false });
   }
 
-  getFilledInPixels(stride: number) {
-    if (!stride || stride < 1) {
-      stride = 1;
-    }
-
+  getCheckZone() {
     let x = 0;
     let y = 0;
     let width = this.canvas.width;
@@ -157,24 +162,47 @@ class Scratch extends Component<Props, State> {
       height = this.props.customCheckZone.height;
     }
 
-    const pixels = this.ctx.getImageData(
-      x,
-      y,
-      width,
-      height
-    );
+    return { x, y, width, height };
+  }
 
-    const total = pixels.data.length / stride;
-    let count = 0;
+  initializeScratchGrid() {
+    const zone = this.getCheckZone();
+    const columns = Math.ceil(zone.width / SCRATCH_GRID_SIZE);
+    const rows = Math.ceil(zone.height / SCRATCH_GRID_SIZE);
 
-    for (let i = 0; i < pixels.data.length; i += stride) {
-      // @ts-ignore
-      if (parseInt(pixels.data[i], 10) === 0) {
-        count++;
-      }
+    this.scratchedCells = new Set();
+    this.scratchableCellCount = columns * rows;
+  }
+
+  markScratchArea(x: number, y: number, width: number, height: number) {
+    const zone = this.getCheckZone();
+    const startX = Math.max(zone.x, x);
+    const startY = Math.max(zone.y, y);
+    const endX = Math.min(zone.x + zone.width, x + width);
+    const endY = Math.min(zone.y + zone.height, y + height);
+
+    if (startX >= endX || startY >= endY) {
+      return;
     }
 
-    return Math.round((count / total) * 100);
+    const startColumn = Math.floor((startX - zone.x) / SCRATCH_GRID_SIZE);
+    const endColumn = Math.floor((endX - zone.x - 1) / SCRATCH_GRID_SIZE);
+    const startRow = Math.floor((startY - zone.y) / SCRATCH_GRID_SIZE);
+    const endRow = Math.floor((endY - zone.y - 1) / SCRATCH_GRID_SIZE);
+
+    for (let row = startRow; row <= endRow; row++) {
+      for (let column = startColumn; column <= endColumn; column++) {
+        this.scratchedCells.add(`${column}:${row}`);
+      }
+    }
+  }
+
+  getFilledPercentage() {
+    if (this.scratchableCellCount === 0) {
+      return 0;
+    }
+
+    return Math.round((this.scratchedCells.size / this.scratchableCellCount) * 100);
   }
 
   getMouse(e: any, canvas: HTMLCanvasElement) {
@@ -269,15 +297,28 @@ class Scratch extends Component<Props, State> {
           this.props.customBrush.width,
           this.props.customBrush.height
         );
+        this.markScratchArea(
+          x,
+          y,
+          this.props.customBrush.width,
+          this.props.customBrush.height
+        );
       } else {
         this.ctx.beginPath();
         this.ctx.arc(x, y, this.props.brushSize || 20, 0, 2 * Math.PI, false);
         this.ctx.fill();
+        const radius = this.props.brushSize || 20;
+        this.markScratchArea(
+          x - radius,
+          y - radius,
+          radius * 2,
+          radius * 2
+        );
       }
     }
 
     this.lastPoint = currentPoint;
-    this.handlePercentage(this.getFilledInPixels(32));
+    this.handlePercentage(this.getFilledPercentage());
   }
 
   handleMouseUp = () => {

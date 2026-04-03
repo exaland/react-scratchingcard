@@ -129,7 +129,7 @@ const App = () => {
 | width             | number          |             |
 | height            | number          |             |
 | image             | File \| string \| {src?: string, default?: string}  |             |
-| imageCrossOrigin  | ?'' \| 'anonymous' \| 'use-credentials' | 'anonymous' |
+| imageCrossOrigin  | ?'' \| 'anonymous' \| 'use-credentials' |             |
 | finishPercent     | ?number         | 70          |
 | brushSize         | ?number         | 20          |
 | fadeOutOnComplete | ?boolean        | true        |
@@ -151,6 +151,8 @@ const App = () => {
 ```
 
 Note: pour calculer le pourcentage gratté (`finishPercent`) avec une image distante, le serveur distant doit autoriser CORS.
+
+Le composant n'impose plus CORS par defaut pour une URL distante. `imageCrossOrigin` est utile seulement si ton serveur renvoie deja les en-tetes CORS voulus.
 
 ### CustomBrush
 
