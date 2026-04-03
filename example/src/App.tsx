@@ -3,9 +3,44 @@ import ScratchCard, { CUSTOM_BRUSH_PRESET } from 'react-scratchingcard'
 
 import * as IMG from './img.jpg'
 
+type Locale = 'fr' | 'en'
+
+const copy = {
+  fr: {
+    eyebrow: 'Demo React Component',
+    title: 'Casino Retro Scratch Card',
+    subtitle: 'Gratte la carte, revele ton lot et replonge dans l atmosphere des salles de jeux vintage.',
+    sectionTitle: 'Jackpot Instantane',
+    sectionText: 'Gratte 80% de la zone pour declencher la revelation.',
+    reset: 'Rejouer',
+    prizeLabel: 'TU REMPORTES',
+    prizeText: '-20%',
+    prizeCaption: 'sur ta prochaine commande',
+    statusIdle: 'Gratte la surface pour decouvrir ton bonus.',
+    statusDone: 'Jackpot ! Carte terminee.',
+    langButton: 'English'
+  },
+  en: {
+    eyebrow: 'React Component Demo',
+    title: 'Retro Casino Scratch Card',
+    subtitle: 'Scratch the ticket, reveal your prize, and dive into a classic casino vibe.',
+    sectionTitle: 'Instant Jackpot',
+    sectionText: 'Scratch 80% of the area to unlock the reveal.',
+    reset: 'Play Again',
+    prizeLabel: 'YOU WIN',
+    prizeText: '-20%',
+    prizeCaption: 'on your next order',
+    statusIdle: 'Scratch the surface to reveal your bonus.',
+    statusDone: 'Jackpot! Card completed.',
+    langButton: 'Francais'
+  }
+} as const
+
 const App = () => {
   const ref = useRef<ScratchCard>(null)
   const [isComplete, setIsComplete] = useState(false)
+  const [locale, setLocale] = useState<Locale>('fr')
+  const t = copy[locale]
 
   const onClickReset = () => {
     if (ref.current) {
@@ -20,21 +55,28 @@ const App = () => {
       <div className="bg-shape bg-shape-right" aria-hidden="true" />
 
       <section className="hero">
-        <p className="eyebrow">React Library Demo</p>
-        <h1>Gratte et Revele Une Surprise</h1>
-        <p className="subtitle">
-          Une experience scratch card moderne, fluide et simple a integrer dans vos projets React.
-        </p>
+        <div className="hero-topbar">
+          <p className="eyebrow">{t.eyebrow}</p>
+          <button
+            type="button"
+            className="lang-button"
+            onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
+          >
+            {t.langButton}
+          </button>
+        </div>
+        <h1>{t.title}</h1>
+        <p className="subtitle">{t.subtitle}</p>
       </section>
 
       <section className="card-shell">
         <div className="card-header">
           <div>
-            <h2>Instant Win</h2>
-            <p>Decouvre ton message cache en grattant la zone ci-dessous.</p>
+            <h2>{t.sectionTitle}</h2>
+            <p>{t.sectionText}</p>
           </div>
           <button type="button" className="reset-button" onClick={onClickReset}>
-            Recommencer
+            {t.reset}
           </button>
         </div>
 
@@ -50,15 +92,15 @@ const App = () => {
             customBrush={CUSTOM_BRUSH_PRESET}
           >
             <div className="prize-content">
-              <p className="prize-label">TU AS GAGNE</p>
-              <h3>-20%</h3>
-              <p className="prize-caption">sur ta prochaine commande</p>
+              <p className="prize-label">{t.prizeLabel}</p>
+              <h3>{t.prizeText}</h3>
+              <p className="prize-caption">{t.prizeCaption}</p>
             </div>
           </ScratchCard>
         </div>
 
         <p className={`status ${isComplete ? 'status-complete' : ''}`}>
-          {isComplete ? 'Bravo, carte completee !' : 'Gratte 80% de la surface pour reveler le gain.'}
+          {isComplete ? t.statusDone : t.statusIdle}
         </p>
       </section>
     </main>

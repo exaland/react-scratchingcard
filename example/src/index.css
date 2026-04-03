@@ -1,11 +1,12 @@
 :root {
-  --bg-dark: #081f2c;
-  --bg-mid: #113a4f;
-  --ink: #eaf5ff;
-  --ink-muted: #b9d0e2;
-  --accent: #ffb703;
-  --accent-2: #fb8500;
-  --panel: rgba(8, 31, 44, 0.7);
+  --bg-dark: #1a0b0b;
+  --bg-mid: #351313;
+  --ink: #f8edda;
+  --ink-muted: #d8c9ac;
+  --accent: #f6c453;
+  --accent-2: #ff9f43;
+  --panel: rgba(39, 10, 10, 0.78);
+  --gold-deep: #8d5b11;
 }
 
 * {
@@ -22,10 +23,10 @@ body,
 body {
   margin: 0;
   color: var(--ink);
-  background: radial-gradient(circle at 20% 10%, #1b5b73 0%, transparent 45%),
-    radial-gradient(circle at 85% 85%, #1f4c5f 0%, transparent 40%),
-    linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 60%, #0f2837 100%);
-  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at 15% 10%, #5b1d1d 0%, transparent 42%),
+    radial-gradient(circle at 85% 78%, #6a2f17 0%, transparent 37%),
+    linear-gradient(140deg, #170606 0%, var(--bg-mid) 52%, #2a0f0f 100%);
+  font-family: Georgia, 'Times New Roman', serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -54,13 +55,13 @@ body {
 .bg-shape-left {
   top: -120px;
   left: -140px;
-  background: #2a9d8f;
+  background: #8b2438;
 }
 
 .bg-shape-right {
   right: -140px;
   bottom: -130px;
-  background: #e76f51;
+  background: #aa7c2f;
 }
 
 .hero,
@@ -75,6 +76,13 @@ body {
   animation: float-in 0.6s ease-out;
 }
 
+.hero-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
 .eyebrow {
   margin: 0;
   color: var(--accent);
@@ -84,11 +92,29 @@ body {
   font-size: 0.78rem;
 }
 
+.lang-button {
+  border: 1px solid rgba(246, 196, 83, 0.55);
+  background: linear-gradient(130deg, rgba(246, 196, 83, 0.2), rgba(255, 159, 67, 0.18));
+  color: var(--ink);
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.lang-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(246, 196, 83, 0.9);
+  box-shadow: 0 8px 16px rgba(246, 196, 83, 0.2);
+}
+
 .hero h1 {
   margin: 10px 0 12px;
   font-size: clamp(2rem, 6vw, 3.3rem);
   line-height: 1.06;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 0 #000;
 }
 
 .subtitle {
@@ -102,10 +128,10 @@ body {
   width: min(100%, 560px);
   padding: 18px;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: linear-gradient(155deg, var(--panel), rgba(10, 45, 64, 0.45));
+  border: 1px solid rgba(246, 196, 83, 0.35);
+  background: linear-gradient(155deg, var(--panel), rgba(57, 14, 14, 0.6));
   backdrop-filter: blur(6px);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 205, 107, 0.12);
   animation: rise-in 0.75s ease-out;
 }
 
@@ -129,19 +155,19 @@ body {
 }
 
 .reset-button {
-  border: 0;
+  border: 1px solid rgba(255, 221, 140, 0.75);
   border-radius: 999px;
   padding: 10px 16px;
   font-weight: 700;
-  color: #1c2c35;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #3a1900;
+  background: linear-gradient(135deg, #ffe08a, var(--accent-2));
   cursor: pointer;
   transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 
 .reset-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 18px rgba(251, 133, 0, 0.35);
+  box-shadow: 0 10px 18px rgba(255, 164, 65, 0.35);
 }
 
 .scratch-wrapper {
@@ -156,9 +182,17 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #ffcf4d 0%, #f9b233 35%, #e98d20 100%);
-  color: #21303a;
+  background: repeating-linear-gradient(
+      135deg,
+      rgba(255, 245, 206, 0.12) 0,
+      rgba(255, 245, 206, 0.12) 8px,
+      rgba(255, 245, 206, 0) 8px,
+      rgba(255, 245, 206, 0) 16px
+    ),
+    linear-gradient(145deg, #6b1f1f 0%, #8c2e2e 45%, #3e1313 100%);
+  color: #ffe3a8;
   border-radius: 12px;
+  border: 2px solid rgba(255, 210, 120, 0.5);
 }
 
 .prize-label {
@@ -170,8 +204,10 @@ body {
 
 .prize-content h3 {
   margin: 6px 0;
-  font-size: 2.6rem;
+  font-size: 2.7rem;
   line-height: 1;
+  color: #ffcf63;
+  text-shadow: 0 1px 0 #3a2200;
 }
 
 .prize-caption {
@@ -189,7 +225,7 @@ body {
 }
 
 .status-complete {
-  color: #8ff1be;
+  color: #ffda8f;
   font-weight: 700;
 }
 
@@ -223,6 +259,11 @@ body {
 
   .card-shell {
     padding: 14px;
+  }
+
+  .hero-topbar {
+    flex-direction: column;
+    align-items: center;
   }
 
   .card-header {
