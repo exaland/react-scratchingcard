@@ -16,6 +16,8 @@ https://github.com/aleksik/react-scratchcard
 - Change brush size through props
 - Use custom brush through props
 - Define a custom check zone through props
+- Add demo page on GitHub Pages
+- Fix Mobile support (touch events)
 
 ## Demo
 

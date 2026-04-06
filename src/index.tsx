@@ -216,9 +216,12 @@ class Scratch extends Component<Props, State> {
     if (e && e.pageX && e.pageY) {
       x = e.pageX - left - scrollLeft;
       y = e.pageY - top - scrollTop;
-    } else if (e && e.touches) {
-      x = e.touches[0].clientX - left - scrollLeft;
-      y = e.touches[0].clientY - top - scrollTop;
+    } else if (e && e.touches && e.touches.length > 0) {
+      x = e.touches[0].clientX - left;
+      y = e.touches[0].clientY - top;
+    } else if (e && e.changedTouches && e.changedTouches.length > 0) {
+      x = e.changedTouches[0].clientX - left;
+      y = e.changedTouches[0].clientY - top;
     }
 
     return { x, y };
@@ -339,7 +342,9 @@ class Scratch extends Component<Props, State> {
     const canvasStyle = {
       position: 'absolute' as const,
       top: 0,
-      zIndex: 1
+      zIndex: 1,
+      touchAction: 'none' as const,
+      WebkitTapHighlightColor: 'transparent'
     };
 
     const resultStyle = {
@@ -366,6 +371,7 @@ class Scratch extends Component<Props, State> {
           onTouchMove={this.handleMouseMove}
           onMouseUp={this.handleMouseUp}
           onTouchEnd={this.handleMouseUp}
+          onTouchCancel={this.handleMouseUp}
         />
         <div className='ScratchCard__Result' style={resultStyle}>
           {this.props.children}
