@@ -16,6 +16,9 @@ https://github.com/aleksik/react-scratchcard
 - Change brush size through props
 - Use custom brush through props
 - Define a custom check zone through props
+- Add live progress callback (`onScratchProgress`)
+- Add interaction callbacks (`onScratchStart`, `onScratchEnd`)
+- Add programmatic controls through ref (`reveal`, `lock`, `unlock`, `getProgress`, `isRevealed`)
 - Add demo page on GitHub Pages
 - Fix Mobile support (touch events)
 
@@ -53,11 +56,16 @@ const App = () => {
   return (
     <div>
       <button onClick={onClickReset}>Reset</button>
+      <button onClick={() => ref.current && ref.current.reveal()}>Reveal now</button>
       <ScratchCard
+        ref={ref}
         width={320}
         height={226}
         image={IMG}
         finishPercent={80}
+        onScratchProgress={(value) => console.log('progress', value)}
+        onScratchStart={() => console.log('scratch start')}
+        onScratchEnd={(value) => console.log('scratch end', value)}
         onComplete={() => console.log('complete')}
       >
         <div style={{
@@ -137,6 +145,10 @@ const App = () => {
 | brushSize         | ?number         | 20          |
 | fadeOutOnComplete | ?boolean        | true        |
 | onComplete        | ?callback       |             |
+| onScratchStart    | ?callback       |             |
+| onScratchEnd      | ?(percent: number) => void |             |
+| onScratchProgress | ?(percent: number) => void |             |
+| disabled          | ?boolean        | false       |
 | customBrush       | ?CustomBrush    |             |
 | customCheckZone   | ?CustomCheckZone|             |
 
@@ -174,7 +186,18 @@ Le composant n'impose plus CORS par defaut pour une URL distante. `imageCrossOri
 | width    | number         |
 | height   | number         |
 
+### Ref methods
 
+```tsx
+const ref = useRef<ScratchCard>(null)
+
+ref.current?.reset()
+ref.current?.reveal() // reveal immediately
+ref.current?.lock() // disable scratching
+ref.current?.unlock() // enable scratching
+ref.current?.getProgress() // current percent
+ref.current?.isRevealed() // completion state
+```
 
 ## License
 

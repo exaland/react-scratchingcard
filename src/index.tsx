@@ -27,8 +27,12 @@ interface Props {
   imageCrossOrigin?: '' | 'anonymous' | 'use-credentials'
   finishPercent?: number
   onComplete?: () => void
+  onScratchStart?: () => void
+  onScratchEnd?: (percentage: number) => void
+  onScratchProgress?: (percentage: number) => void
   brushSize?: number
   fadeOutOnComplete?: boolean
+  disabled?: boolean
   children?: any
   customBrush?: CustomBrush
   customCheckZone?: CustomCheckZone
@@ -62,6 +66,12 @@ class Scratch extends Component<Props, State> {
 
   isFinished: boolean = false;
 
+  isLocked: boolean = false;
+
+  currentFilledPercentage: number = 0;
+
+  lastEmittedPercentage: number = -1;
+
   constructor(props: Props) {
     super(props);
     this.state = { loaded: false, finished: false };
@@ -70,6 +80,10 @@ class Scratch extends Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     if (prevProps.image !== this.props.image) {
       this.loadImage();
+    }
+
+    if (prevProps.disabled !== this.props.disabled) {
+      this.isLocked = !!this.props.disabled;
     }
   }
 
@@ -117,8 +131,12 @@ class Scratch extends Component<Props, State> {
       this.ctx.clearRect(0, 0, this.props.width, this.props.height);
       this.ctx.drawImage(this.image, 0, 0, this.props.width, this.props.height);
       this.initializeScratchGrid();
+      this.currentFilledPercentage = 0;
+      this.lastEmittedPercentage = -1;
       this.isFinished = false;
-      this.setState({ loaded: true, finished: false });
+      this.setState({ loaded: true, finished: false }, () => {
+        this.emitScratchProgress(true);
+      });
     };
 
     this.image.src = this.resolveImageSource(this.props.image);
@@ -130,6 +148,7 @@ class Scratch extends Component<Props, State> {
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
 
     this.loadImage();
+    this.isLocked = !!this.props.disabled;
 
     if (this.props.customBrush) {
       this.brushImage = new Image(
@@ -142,11 +161,16 @@ class Scratch extends Component<Props, State> {
 
   reset = () => {
     this.canvas.style.opacity = '1';
+    this.canvas.style.transition = '';
     this.ctx.globalCompositeOperation = 'source-over';
     this.ctx.drawImage(this.image, 0, 0, this.props.width, this.props.height);
     this.initializeScratchGrid();
+    this.currentFilledPercentage = 0;
+    this.lastEmittedPercentage = -1;
     this.isFinished = false;
-    this.setState({ finished: false });
+    this.setState({ finished: false }, () => {
+      this.emitScratchProgress(true);
+    });
   }
 
   getCheckZone() {
@@ -205,6 +229,87 @@ class Scratch extends Component<Props, State> {
     return Math.round((this.scratchedCells.size / this.scratchableCellCount) * 100);
   }
 
+  getProgress = () => {
+    return this.currentFilledPercentage;
+  }
+
+  isRevealed = () => {
+    return this.isFinished;
+  }
+
+  lock = () => {
+    this.isLocked = true;
+  }
+
+  unlock = () => {
+    this.isLocked = false;
+  }
+
+  markAllScratched() {
+    const zone = this.getCheckZone();
+    const columns = Math.ceil(zone.width / SCRATCH_GRID_SIZE);
+    const rows = Math.ceil(zone.height / SCRATCH_GRID_SIZE);
+
+    this.scratchedCells = new Set();
+
+    for (let row = 0; row < rows; row++) {
+      for (let column = 0; column < columns; column++) {
+        this.scratchedCells.add(`${column}:${row}`);
+      }
+    }
+
+    this.scratchableCellCount = columns * rows;
+  }
+
+  emitScratchProgress(force = false) {
+    if (!this.props.onScratchProgress) {
+      return;
+    }
+
+    if (force || this.lastEmittedPercentage !== this.currentFilledPercentage) {
+      this.lastEmittedPercentage = this.currentFilledPercentage;
+      this.props.onScratchProgress(this.currentFilledPercentage);
+    }
+  }
+
+  updateScratchProgress() {
+    this.currentFilledPercentage = this.getFilledPercentage();
+    this.emitScratchProgress();
+    this.handlePercentage(this.currentFilledPercentage);
+  }
+
+  finishScratch(triggerOnComplete = true) {
+    if (this.isFinished) {
+      return;
+    }
+
+    if (this.props.fadeOutOnComplete !== false) {
+      this.canvas.style.transition = '1s';
+      this.canvas.style.opacity = '0';
+    }
+
+    this.currentFilledPercentage = 100;
+    this.emitScratchProgress();
+    this.setState({ finished: true });
+
+    if (triggerOnComplete && this.props.onComplete) {
+      this.props.onComplete();
+    }
+
+    this.isFinished = true;
+  }
+
+  reveal = (triggerOnComplete = true) => {
+    if (!this.state.loaded) {
+      return;
+    }
+
+    this.ctx.globalCompositeOperation = 'destination-out';
+    this.ctx.clearRect(0, 0, this.props.width, this.props.height);
+    this.markAllScratched();
+    this.finishScratch(triggerOnComplete);
+  }
+
   getMouse(e: any, canvas: HTMLCanvasElement) {
     const { top, left } = canvas.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -255,27 +360,62 @@ class Scratch extends Component<Props, State> {
     }
 
     if (filledInPixels > finishPercent) {
-      if (this.props.fadeOutOnComplete !== false) {
-        this.canvas.style.transition = '1s';
-        this.canvas.style.opacity = '0';
-      }
-
-      this.setState({ finished: true });
-      if (this.props.onComplete) {
-        this.props.onComplete();
-      }
-
-      this.isFinished = true;
+      this.finishScratch(true);
     }
   }
 
+  scratchAtPoint(x: number, y: number) {
+    this.ctx.globalCompositeOperation = 'destination-out';
+
+    if (this.brushImage && this.props.customBrush) {
+      this.ctx.drawImage(
+        this.brushImage,
+        x,
+        y,
+        this.props.customBrush.width,
+        this.props.customBrush.height
+      );
+      this.markScratchArea(
+        x,
+        y,
+        this.props.customBrush.width,
+        this.props.customBrush.height
+      );
+      return;
+    }
+
+    const radius = this.props.brushSize || 20;
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+    this.ctx.fill();
+    this.markScratchArea(
+      x - radius,
+      y - radius,
+      radius * 2,
+      radius * 2
+    );
+  }
+
   handleMouseDown = (e: any) => {
+    if (this.isFinished || this.isLocked || this.props.disabled) {
+      return;
+    }
+
     this.isDrawing = true;
     this.lastPoint = this.getMouse(e, this.canvas);
+
+    if (this.lastPoint) {
+      this.scratchAtPoint(this.lastPoint.x, this.lastPoint.y);
+      this.updateScratchProgress();
+    }
+
+    if (this.props.onScratchStart) {
+      this.props.onScratchStart();
+    }
   }
 
   handleMouseMove = (e: any) => {
-    if (!this.isDrawing) {
+    if (!this.isDrawing || this.isFinished || this.isLocked || this.props.disabled) {
       return;
     }
 
@@ -285,47 +425,29 @@ class Scratch extends Component<Props, State> {
     const distance = this.distanceBetween(this.lastPoint, currentPoint);
     const angle = this.angleBetween(this.lastPoint, currentPoint);
 
-    let x, y;
+    let x;
+    let y;
 
     for (let i = 0; i < distance; i++) {
       x = this.lastPoint ? this.lastPoint.x + Math.sin(angle) * i : 0;
       y = this.lastPoint ? this.lastPoint.y + Math.cos(angle) * i : 0;
-      this.ctx.globalCompositeOperation = 'destination-out';
-
-      if (this.brushImage && this.props.customBrush) {
-        this.ctx.drawImage(
-          this.brushImage,
-          x,
-          y,
-          this.props.customBrush.width,
-          this.props.customBrush.height
-        );
-        this.markScratchArea(
-          x,
-          y,
-          this.props.customBrush.width,
-          this.props.customBrush.height
-        );
-      } else {
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, this.props.brushSize || 20, 0, 2 * Math.PI, false);
-        this.ctx.fill();
-        const radius = this.props.brushSize || 20;
-        this.markScratchArea(
-          x - radius,
-          y - radius,
-          radius * 2,
-          radius * 2
-        );
-      }
+      this.scratchAtPoint(x, y);
     }
 
     this.lastPoint = currentPoint;
-    this.handlePercentage(this.getFilledPercentage());
+    this.updateScratchProgress();
   }
 
   handleMouseUp = () => {
+    if (!this.isDrawing) {
+      return;
+    }
+
     this.isDrawing = false;
+
+    if (this.props.onScratchEnd) {
+      this.props.onScratchEnd(this.currentFilledPercentage);
+    }
   }
 
   render() {
